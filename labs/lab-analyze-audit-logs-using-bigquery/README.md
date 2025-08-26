@@ -46,10 +46,20 @@ LIMIT 100;
 - Place screenshots in `./evidence/`
 - Place JSON, CSV, or exports in `./artifacts/`
 
-## Reflection
-- What worked well
-- What to change next time
-- Detection and response improvements
+## Reflections
+**What worked well**
+- Built reusable SQL snippets to filter by principal, resource, and method names
+- Identified outlier behaviors using time windows and simple aggregations
+
+**Challenges**
+- Navigating schema variations across audit log tables and partitions
+
+**Improvements implemented**
+- Created a small library of parameterized queries with comments
+- Added a normalization layer for common fields to simplify joins and filters
+
+**Impact**
+- Faster investigations and a foundation for detection engineering using auditable, shareable queries
 
 ## Skills and Tags
 - Skills: Audit log analysis, Detection engineering, SQL
