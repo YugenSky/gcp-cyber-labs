@@ -1,6 +1,6 @@
 # Google Cloud Cybersecurity Labs
 
-Hands-on labs completed as part of a Google Cloud cybersecurity learning path. Each lab folder includes reproducible steps, commands, and screenshots.
+Hands-on labs completed as part of a Google Cloud cybersecurity learning path. Each lab folder includes reproducible steps and commands.
 
 ## Contents
 - [Create symmetric and asymmetric keys](./labs/lab-create-symmetric-and-asymmetric-keys)
@@ -16,16 +16,11 @@ Hands-on labs completed as part of a Google Cloud cybersecurity learning path. E
 - Alert triage and false-positive reduction
 - Evidence collection and post-incident actions
 
-## How to Use
-1. Open a lab under `labs/` and follow its README.
-2. Add screenshots to `evidence/` and exports to `artifacts/`.
-3. Commit changes and push to GitHub.
-
 ## Notes
-This repo contains no secrets or proprietary data. Examples are safe placeholders you can adapt in a sandbox project.
+This repo contains no trade secrets or proprietary data. Examples are safe placeholders you can adapt in a sandbox project.
 
 
-## Portfolio Overview (Resume Mapping)
+## Portfolio Overview
 
 Each lab demonstrates practical cybersecurity skills aligned with industry practices:
 
