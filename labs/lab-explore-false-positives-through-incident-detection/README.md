@@ -11,35 +11,63 @@
 - Cloud Shell or local terminal with `gcloud`
 
 ## Steps
-1. Preparation and access checks
-2. Main exercise procedures
-3. Validation
-4. Cleanup
-5. Lessons learned
+1. **Create a new service account**
+   - Console: IAM & Admin → Service Accounts → **+ Create Service Account**  
+   - Name: `test-account`  
+   - Role: **Basic → Owner**  
+   - Click **Create and Continue → Done**
 
-Replace these with the exact steps you performed. If a step used console UI, include the path. If CLI, include the commands.
+2. **Generate a JSON key for the service account**
+   - Open the `test-account` service account details  
+   - Actions (⋮) → Manage keys → **Add Key → Create new key**  
+   - Key type: JSON → Download  
+   - Rename downloaded file to `test-account.json`  
+   - Open Cloud Shell → More (⋮) → Upload → select `test-account.json`  
+   - Run `ls` in Cloud Shell to confirm the file uploaded
+
+3. **Trigger the false positive detection**
+   - Export project and service account variables  
+   - Activate the service account using the JSON key  
+   - List active credentials to confirm  
+   - Grant a second user (`Google Cloud username 2`) the **roles/editor** role in the project
+
+4. **Switch to the second user**
+   - In the console, add the second account using lab-provided credentials  
+   - Sign in and switch to this account
+
+5. **Review the detection finding**
+   - Console: Security → Findings → Quick filters → **User managed service account key**  
+   - Open the most recent finding  
+   - Review details under **Summary** tab (severity, threat class, compliance tab info)
+
+6. **Remediate**
+   - Console: IAM & Admin → Service Accounts → select `test-account`  
+   - Go to the **Keys** tab  
+   - Delete the JSON key associated with this service account
 
 ## Commands and Queries
 
-### gcloud
+### Cloud Shell Commands
+
 ```bash
-# Set project
-gcloud config set project <PROJECT_ID>
+# Store current project ID in a variable
+export PROJECT_ID=$(gcloud info --format="value(config.project)")
 
-# Example: list auth accounts
+# Store the full email of the service account
+export SA_NAME="test-account@${PROJECT_ID}.iam.gserviceaccount.com"
+
+# Authenticate using the service account JSON key
+gcloud auth activate-service-account ${SA_NAME} --key-file=test-account.json
+
+# Verify which accounts are currently authenticated
 gcloud auth list
-```
 
-### BigQuery SQL
-```sql
--- Example: recent audit log events
-SELECT
-  protopayload_auditlog.methodName,
-  protopayload_auditlog.authenticationInfo.principalEmail,
-  timestamp
-FROM `PROJECT_ID.cloudaudit_googleapis_com_data_access.events_*`
-WHERE timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY)
-LIMIT 100;
+# Grant the second lab user the Editor role on the project
+export STUDENT2="Google Cloud username 2"
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+  --member user:${STUDENT2} \
+  --role roles/editor
+  
 ```
 
 ## Reflection

@@ -11,35 +11,109 @@
 - Cloud Shell or local terminal with `gcloud`
 
 ## Steps
-1. Preparation and access checks
-2. Main exercise procedures
-3. Validation
-4. Cleanup
-5. Lessons learned
+1. **Generate account activity**
+   - Create a storage bucket and upload a sample file.
+   - Create a VPC network and a VM instance.
+   - Remove the storage bucket.
 
-Replace these with the exact steps you performed. If a step used console UI, include the path. If CLI, include the commands.
+2. **Export audit logs**
+   - In Logs Explorer, run a query for activity logs.  
+   - Create a sink named `AuditLogsExport`.  
+   - Export to a new BigQuery dataset `auditlogs_dataset`.  
 
-## Commands and Queries
+3. **Generate more activity**
+   - Create additional buckets and upload files.  
+   - Delete the VM instance.  
+   - Remove the created buckets.  
 
-### gcloud
+4. **Switch to second user**
+   - Log into the console using the second provided lab account.  
+
+5. **Analyze Admin Activity Logs**
+   - In Logs Explorer, search for `storage.buckets.delete`.  
+   - Review matching entries and expand to see the `principalEmail`.  
+
+6. **Use BigQuery**
+   - Open `auditlogs_dataset` in BigQuery.  
+   - Run SQL queries against the `cloudaudit_googleapis_com_activity` table to analyze recent activity such as VM deletion and bucket deletion.  
+
+## Cloud Shell Commands
 ```bash
-# Set project
-gcloud config set project <PROJECT_ID>
+# Create a storage bucket in the project
+gcloud storage buckets create gs://$DEVSHELL_PROJECT_ID
 
-# Example: list auth accounts
-gcloud auth list
+# Create a sample file and upload it to the bucket
+echo "this is a sample file" > sample.txt
+gcloud storage cp sample.txt gs://$DEVSHELL_PROJECT_ID
+
+# Create a new VPC network
+gcloud compute networks create mynetwork --subnet-mode=auto
+
+# Capture the default compute zone into a variable
+export ZONE=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
+
+# Create a VM instance in the new network
+gcloud compute instances create default-us-vm --machine-type=e2-micro --zone=$ZONE --network=mynetwork
+
+# Remove the storage bucket (cleanup)
+gcloud storage rm --recursive gs://$DEVSHELL_PROJECT_ID
+
+# Create additional buckets for more activity
+gcloud storage buckets create gs://$DEVSHELL_PROJECT_ID
+gcloud storage buckets create gs://$DEVSHELL_PROJECT_ID-test
+
+# Create another sample file and upload it
+echo "this is another sample file" > sample2.txt
+gcloud storage cp sample.txt gs://$DEVSHELL_PROJECT_ID-test
+
+# Delete the VM instance and its attached disks
+export ZONE=$(gcloud compute project-info describe --format="value(commonInstanceMetadata.items[google-compute-default-zone])")
+gcloud compute instances delete --zone=$ZONE --delete-disks=all default-us-vm
+# Confirm deletion by entering Y when prompted
+
+# Remove both storage buckets (cleanup)
+gcloud storage rm --recursive gs://$DEVSHELL_PROJECT_ID
+gcloud storage rm --recursive gs://$DEVSHELL_PROJECT_ID-test
+
 ```
 
 ### BigQuery SQL
 ```sql
--- Example: recent audit log events
+-- Query to filter Cloud Audit Activity logs
+logName = ("projects/PROJECT_ID/logs/cloudaudit.googleapis.com%2Factivity")
+-- Identify VM deletion events in the last 7 days
 SELECT
-  protopayload_auditlog.methodName,
-  protopayload_auditlog.authenticationInfo.principalEmail,
-  timestamp
-FROM `PROJECT_ID.cloudaudit_googleapis_com_data_access.events_*`
-WHERE timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY)
-LIMIT 100;
+  timestamp,
+  resource.labels.instance_id,
+  protoPayload.authenticationInfo.principalEmail,
+  protoPayload.resourceName,
+  protoPayload.methodName
+FROM
+  `auditlogs_dataset.cloudaudit_googleapis_com_activity_*`
+WHERE
+  PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) BETWEEN
+  DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY) AND CURRENT_DATE()
+  AND resource.type = "gce_instance"
+  AND operation.first IS TRUE
+  AND protoPayload.methodName = "v1.compute.instances.delete"
+ORDER BY timestamp, resource.labels.instance_id
+LIMIT 1000;
+-- Identify bucket deletion events in the last 7 days
+SELECT
+  timestamp,
+  resource.labels.bucket_name,
+  protoPayload.authenticationInfo.principalEmail,
+  protoPayload.resourceName,
+  protoPayload.methodName
+FROM
+  `auditlogs_dataset.cloudaudit_googleapis_com_activity_*`
+WHERE
+  PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) BETWEEN
+  DATE_SUB(CURRENT_DATE(), INTERVAL 7 DAY) AND CURRENT_DATE()
+  AND resource.type = "gcs_bucket"
+  AND protoPayload.methodName = "storage.buckets.delete"
+ORDER BY timestamp, resource.labels.instance_id
+LIMIT 1000;
 ```
 
 ## Reflections

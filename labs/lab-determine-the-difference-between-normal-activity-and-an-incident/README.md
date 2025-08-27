@@ -11,36 +11,44 @@
 - Cloud Shell or local terminal with `gcloud`
 
 ## Steps
-1. Preparation and access checks
-2. Main exercise procedures
-3. Validation
-4. Cleanup
-5. Lessons learned
+1. **Grant an external account temporary permissions**
+   - Console: IAM & Admin → IAM → **Grant Access**
+   - New principal: `bad.actor.demo@gmail.com`
+   - Role: **Basic → Owner**
+   - Click **Save**
 
-Replace these with the exact steps you performed. If a step used console UI, include the path. If CLI, include the commands.
+2. **Review Event Threat Detection (ETD) findings**
+   - Console: Security → **Findings**
+   - Locate findings labeled **Persistence: IAM anomalous grant**
+
+3. **Analyze the finding details**
+   - Open the earliest **Persistence: IAM Anomalous Grant** finding
+   - Note the **principal email** (the normal qwiklabs.net user)
+   - Go to **Source properties** → expand **sensitiveRoleGrant → members**
+   - Compare entries from the normal user vs the external user
+
+4. **Correlate the finding in Cloud Logging**
+   - Open **Logs Explorer**
+   - Pin **Observability Logging** for quick access
+   - Run the IAM-related audit log filter (see Queries below)
+   - Expand the matching entry and open **nested fields** for detail
+
+5. **Remediate**
+   - Console: IAM & Admin → IAM
+   - Next to `bad.actor.demo@gmail.com` click **Edit principal**
+   - Click the **trash** icon to remove **Owner**
+   - Click **Save**
 
 ## Commands and Queries
+-- Logs Explorer (Advanced filter)
+-- Purpose: Show audit events related to project ownership/invite actions that align with the ETD “Persistence: IAM Anomalous Grant” finding.
+-- (Paste ONLY the lines below into Logs Explorer; comments are here in the README for context.)
+```
+protoPayload.authorizationInfo.permission="resourcemanager.projects."
+protoPayload.methodName="InsertProjectOwnershipInvite"
 
-### gcloud
-```bash
-# Set project
-gcloud config set project <PROJECT_ID>
-
-# Example: list auth accounts
-gcloud auth list
 ```
 
-### BigQuery SQL
-```sql
--- Example: recent audit log events
-SELECT
-  protopayload_auditlog.methodName,
-  protopayload_auditlog.authenticationInfo.principalEmail,
-  timestamp
-FROM `PROJECT_ID.cloudaudit_googleapis_com_data_access.events_*`
-WHERE timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY)
-LIMIT 100;
-```
 
 ## Reflection
 Gained experience classifying events vs. incidents, building consistency in triage decisions, and documenting rationale for escalation.

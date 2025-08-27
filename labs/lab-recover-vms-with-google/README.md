@@ -11,36 +11,60 @@
 - Cloud Shell or local terminal with `gcloud`
 
 ## Steps
-1. Preparation and access checks
-2. Main exercise procedures
-3. Validation
-4. Cleanup
-5. Lessons learned
+1. **Connect to Backup and DR console**
+   - Search for *Backup and DR* in the Cloud Console.
+   - Pin the service for quick access.
+   - From the navigation pane, open **Management console** → **Log in to the management console**.
+   - Use lab-provided account if prompted and skip the welcome tour.
+   - In the title bar, go to **Manage → Appliances**.
 
-Replace these with the exact steps you performed. If a step used console UI, include the path. If CLI, include the commands.
+2. **Create a backup plan template**
+   - Title bar: **Backup Plans → Templates → +Create Template**.
+   - Name: `vm-backup` | Description: *Virtual Machine Backups*.
+   - Add a snapshot policy:
+     - Policy Name: `Daily VM snapshot`
+     - Scheduling: Continuous, every 2 hours
+   - Save the template and confirm creation.
+
+3. **Validate service account permissions**
+   - In the Cloud Console, navigate to **IAM & Admin → IAM**.
+   - Locate the service account for the backup and recovery appliance.
+   - Confirm the role **Backup and DR Cloud Storage Operator** is assigned.
+
+4. **Discover and add Compute Engine instances**
+   - In the Backup and DR console, go to **Backup & Recover → Back Up**.
+   - Under *Google Cloud → Compute Engine*, choose the backup credential.
+   - Search for instances, select `lab-vm`, and apply the `vm-backup` template.
+   - Finish onboarding and monitor the backup job.
+
+5. **Restore a Compute Engine instance**
+   - Backup & Recover → **Recover** → select `lab-vm` → Next.
+   - In the action bar, choose **Table**, select snapshot image → **Mount**.
+   - Choose **Mount as new GCE instance**.
+   - Configuration:
+     - Region: REGION
+     - Zone: ZONE
+     - Instance name: `lab-vm-recovered`
+   - Confirm mount and verify in Job Monitor.
+   - Check in Compute Engine: instances list should show `lab-vm`, `lab-vm-recovered`, and `qwiklabs-appliance`.
+
+6. **Restore to an alternate project**
+   - In **IAM & Admin → IAM**, copy the service account for Backup and DR.
+   - Switch to **Project PROJECT_ID_2**.
+   - Grant that service account the roles:
+     - **Backup and DR Compute Engine Operator**
+     - **Backup and DR Cloud Storage Operator**
+   - Back in Backup and DR console, go to **Recover** → select `lab-vm` → Next.
+   - Select snapshot image → **Mount as new GCE instance**.
+   - Configuration:
+     - Project: `PROJECT_ID_2`
+     - Instance name: `lab-vm-project2`
+     - Region: REGION | Zone: ZONE
+   - Confirm mount and verify `lab-vm-project2` is created in Project 2’s VM instances list.
 
 ## Commands and Queries
 
-### gcloud
-```bash
-# Set project
-gcloud config set project <PROJECT_ID>
-
-# Example: list auth accounts
-gcloud auth list
-```
-
-### BigQuery SQL
-```sql
--- Example: recent audit log events
-SELECT
-  protopayload_auditlog.methodName,
-  protopayload_auditlog.authenticationInfo.principalEmail,
-  timestamp
-FROM `PROJECT_ID.cloudaudit_googleapis_com_data_access.events_*`
-WHERE timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY)
-LIMIT 100;
-```
+No gcloud CLI commands or SQL queries were used in this lab. All steps were performed via the Google Cloud Console UI.
 
 ## Reflection
 Practiced disaster recovery using snapshots and backups, validated restored services, and noted gaps like IAM and network settings.

@@ -11,36 +11,25 @@
 - Cloud Shell or local terminal with `gcloud`
 
 ## Steps
-1. Preparation and access checks
-2. Main exercise procedures
-3. Validation
-4. Cleanup
-5. Lessons learned
-
-Replace these with the exact steps you performed. If a step used console UI, include the path. If CLI, include the commands.
+1. Start the lab and open the Google Cloud Console using the provided lab credentials.  
+2. Enable the Key Management Service (KMS) API if not already enabled.  
+3. Create a key ring:  
+   - Name: `demo-key-ring`  
+   - Location type: Region  
+4. Inside the key ring, create a symmetric key:  
+   - Name: `demo-key`  
+   - Purpose: Symmetric encrypt/decrypt  
+   - Key rotation period: 90 days  
+5. Create an asymmetric key in the same key ring:  
+   - Name: `demo-asymmetric-key`  
+   - Purpose: Asymmetric decrypt  
+6. Verify both keys are created and visible in the KMS console.  
+   - Symmetric key shows purpose: *Symmetric encrypt/decrypt*  
+   - Asymmetric key shows purpose: *Asymmetric decrypt*  
+7. End the lab and submit to complete.  
 
 ## Commands and Queries
-
-### gcloud
-```bash
-# Set project
-gcloud config set project <PROJECT_ID>
-
-# Example: list auth accounts
-gcloud auth list
-```
-
-### BigQuery SQL
-```sql
--- Example: recent audit log events
-SELECT
-  protopayload_auditlog.methodName,
-  protopayload_auditlog.authenticationInfo.principalEmail,
-  timestamp
-FROM `PROJECT_ID.cloudaudit_googleapis_com_data_access.events_*`
-WHERE timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY)
-LIMIT 100;
-```
+No CLI or SQL commands were used in this lab. All tasks were performed via the Google Cloud Console UI._
 
 ## Reflection
 Learned the difference between symmetric and asymmetric key use cases, practiced key rotation, and reinforced the importance of least-privilege IAM for KMS.
