@@ -42,14 +42,8 @@ WHERE timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY)
 LIMIT 100;
 ```
 
-## Artifacts
-- Place screenshots in `./evidence/`
-- Place JSON, CSV, or exports in `./artifacts/`
-
 ## Reflection
-- What worked well
-- What to change next time
-- Detection and response improvements
+Improved detection accuracy by investigating alerts, reducing false positives through rule tuning, and measuring before/after impact.
 
 ## Skills and Tags
 - Skills: Alert investigation, Detection tuning, SOC analysis

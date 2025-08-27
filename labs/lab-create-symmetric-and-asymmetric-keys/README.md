@@ -42,14 +42,8 @@ WHERE timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY)
 LIMIT 100;
 ```
 
-## Artifacts
-- Place screenshots in `./evidence/`
-- Place JSON, CSV, or exports in `./artifacts/`
-
 ## Reflection
-- What worked well
-- What to change next time
-- Detection and response improvements
+Learned the difference between symmetric and asymmetric key use cases, practiced key rotation, and reinforced the importance of least-privilege IAM for KMS.
 
 ## Skills and Tags
 - Skills: KMS, Cryptography, Key lifecycle

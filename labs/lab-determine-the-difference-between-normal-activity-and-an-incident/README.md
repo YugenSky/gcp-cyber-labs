@@ -42,14 +42,8 @@ WHERE timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY)
 LIMIT 100;
 ```
 
-## Artifacts
-- Place screenshots in `./evidence/`
-- Place JSON, CSV, or exports in `./artifacts/`
-
 ## Reflection
-- What worked well
-- What to change next time
-- Detection and response improvements
+Gained experience classifying events vs. incidents, building consistency in triage decisions, and documenting rationale for escalation.
 
 ## Skills and Tags
 - Skills: Alert triage, Incident classification, SOC runbooks

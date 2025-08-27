@@ -42,14 +42,8 @@ WHERE timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY)
 LIMIT 100;
 ```
 
-## Artifacts
-- Place screenshots in `./evidence/`
-- Place JSON, CSV, or exports in `./artifacts/`
-
 ## Reflection
-- What worked well
-- What to change next time
-- Detection and response improvements
+Practiced disaster recovery using snapshots and backups, validated restored services, and noted gaps like IAM and network settings.
 
 ## Skills and Tags
 - Skills: BCDR, Snapshot/backup restore, Post-incident validation

@@ -42,10 +42,6 @@ WHERE timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 7 DAY)
 LIMIT 100;
 ```
 
-## Artifacts
-- Place screenshots in `./evidence/`
-- Place JSON, CSV, or exports in `./artifacts/`
-
 ## Reflections
 **What worked well**
 - Built reusable SQL snippets to filter by principal, resource, and method names
